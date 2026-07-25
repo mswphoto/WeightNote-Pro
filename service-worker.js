@@ -1,4 +1,4 @@
-const CACHE_NAME = "weightnote-v5";
+const CACHE_NAME = "weightnote-v6";
 
 const FILES = [
     "./",
