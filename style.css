@@ -86,3 +86,37 @@ button:hover{
     outline: 2px solid #3b82f6;
     border-color: transparent;
 }
+/* 지난 운동 기록 - 날짜 선택 */
+
+#historyDate {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+
+    margin-top: 12px;
+    margin-bottom: 20px;
+
+    padding: 18px 20px;
+
+    font-size: 20px;
+    font-weight: 600;
+
+    color: #111827;
+    background: #f3f4f6;
+
+    border: none;
+    border-radius: 14px;
+
+    min-height: 60px;
+
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+#historyDate::-webkit-date-and-time-value {
+    text-align: left;
+}
+
+#pastHistory {
+    margin-top: 18px;
+}
