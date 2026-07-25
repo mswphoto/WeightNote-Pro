@@ -2,206 +2,359 @@
 <html lang="ko">
 
 <head>
-  <meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
 
-  <title>WeightNote Pro</title>
+    <meta
+        name="theme-color"
+        content="#111827"
+    >
 
-  <meta name="theme-color" content="#111827">
+    <meta
+        name="apple-mobile-web-app-capable"
+        content="yes"
+    >
 
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css">
+    <meta
+        name="apple-mobile-web-app-status-bar-style"
+        content="black-translucent"
+    >
+
+    <meta
+        name="apple-mobile-web-app-title"
+        content="WeightNote Pro"
+    >
+
+    <title>WeightNote Pro</title>
+
+    <link
+        rel="manifest"
+        href="./manifest.json"
+    >
+
+    <link
+        rel="stylesheet"
+        href="./style.css"
+    >
 </head>
+
 
 <body>
 
 <div class="container">
 
-  <h1>🏋️ WeightNote Pro</h1>
+    <h1>🏋️ WeightNote Pro</h1>
 
 
-  <!-- 오늘 운동 입력 -->
+    <!-- =========================
+         오늘 운동 입력
+    ========================== -->
 
-  <div class="card">
+    <section class="card">
 
-    <h2>오늘 운동</h2>
-
-    <label>운동 부위</label>
-
-    <select id="category">
-      <option>가슴</option>
-      <option>등</option>
-      <option>하체</option>
-      <option>어깨</option>
-      <option>팔</option>
-      <option>복근</option>
-      <option>유산소</option>
-    </select>
+        <h2>오늘 운동</h2>
 
 
-    <label>운동 검색</label>
+        <label for="category">
+            운동 부위
+        </label>
 
-    <input
-      type="text"
-      id="searchExercise"
-      placeholder="운동 이름 검색">
+        <select id="category">
 
+            <option value="가슴">
+                가슴
+            </option>
 
-    <label>운동 종목</label>
+            <option value="등">
+                등
+            </option>
 
-    <select id="exercise"></select>
+            <option value="하체">
+                하체
+            </option>
 
+            <option value="어깨">
+                어깨
+            </option>
 
-    <!-- 웨이트 입력 -->
+            <option value="팔">
+                팔
+            </option>
 
-    <div id="weightFields">
+            <option value="복근">
+                복근
+            </option>
 
-      <label>무게 (kg)</label>
+            <option value="유산소">
+                유산소
+            </option>
 
-      <input
-        type="number"
-        id="weightInput"
-        placeholder="예: 60"
-        min="0"
-        step="0.5"
-        inputmode="decimal">
-
-
-      <label>횟수</label>
-
-      <input
-        type="number"
-        id="repsInput"
-        placeholder="예: 10"
-        min="1"
-        step="1"
-        inputmode="numeric">
-
-    </div>
+        </select>
 
 
-    <!-- 유산소 입력 -->
+        <label for="searchExercise">
+            운동 검색
+        </label>
 
-    <div id="cardioFields" hidden>
-
-      <label>시간 (분)</label>
-
-      <input
-        type="number"
-        id="durationInput"
-        placeholder="예: 30"
-        min="1"
-        step="1"
-        inputmode="numeric">
+        <input
+            id="searchExercise"
+            type="search"
+            placeholder="운동 이름 검색"
+            autocomplete="off"
+        >
 
 
-      <label>거리 (km)</label>
+        <label for="exercise">
+            운동 종목
+        </label>
 
-      <input
-        type="number"
-        id="distanceInput"
-        placeholder="예: 3.5"
-        min="0"
-        step="0.1"
-        inputmode="decimal">
-
-    </div>
+        <select id="exercise"></select>
 
 
-    <p>
-      총 운동량 :
-      <b><span id="volume">0</span> kg</b>
-    </p>
+        <!-- 최근 기록 -->
 
-    <p>
-      오늘 운동 기록 :
-      <b><span id="sets">0</span></b>
-    </p>
-
-
-    <button id="startBtn">
-      ➕ 세트 추가
-    </button>
-
-  </div>
+        <div
+            id="lastRecord"
+            class="last-record"
+        >
+            최근 기록이 없습니다.
+        </div>
 
 
-  <!-- 오늘 PR -->
+        <!-- 웨이트 입력 -->
 
-  <div class="card">
+        <div id="weightFields">
 
-    <h2>오늘의 최고 기록(PR)</h2>
+            <label for="weightInput">
+                무게 (kg)
+            </label>
 
-    <div id="pr">
-      아직 기록이 없습니다.
-    </div>
-
-  </div>
-
-
-  <!-- 오늘 기록 -->
-
-  <div class="card">
-
-    <h2>오늘 운동 기록</h2>
-
-    <div id="history">
-      아직 기록이 없습니다.
-    </div>
-
-  </div>
+            <input
+                id="weightInput"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                step="0.5"
+                placeholder="예: 60"
+            >
 
 
-  <!-- 지난 기록 -->
+            <label for="repsInput">
+                횟수
+            </label>
 
-  <div class="card">
+            <input
+                id="repsInput"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                step="1"
+                placeholder="예: 10"
+            >
 
-    <h2>지난 운동 기록</h2>
-
-    <label for="historyDate">
-      날짜 선택
-    </label>
-
-    <input
-      type="date"
-      id="historyDate">
-
-    <div id="pastHistory">
-      날짜를 선택해주세요.
-    </div>
-
-  </div>
+        </div>
 
 
-  <!-- 휴식 타이머 -->
+        <!-- 유산소 입력 -->
 
-  <div class="card">
+        <div
+            id="cardioFields"
+            hidden
+        >
 
-    <h2>휴식 타이머</h2>
+            <label for="durationInput">
+                시간 (분)
+            </label>
 
-    <button id="timer60">60초</button>
-    <button id="timer90">90초</button>
-    <button id="timer120">120초</button>
+            <input
+                id="durationInput"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                step="1"
+                placeholder="예: 30"
+            >
 
-    <p id="timerText">
-      타이머 대기중
-    </p>
 
-  </div>
+            <label for="distanceInput">
+                거리 (km)
+            </label>
+
+            <input
+                id="distanceInput"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                step="0.1"
+                placeholder="예: 3.5"
+            >
+
+        </div>
+
+
+        <!-- 오늘 요약 -->
+
+        <p>
+            총 운동량 :
+            <strong>
+                <span id="volume">0</span> kg
+            </strong>
+        </p>
+
+        <p>
+            오늘 운동 기록 :
+            <strong>
+                <span id="sets">0</span>
+            </strong>
+        </p>
+
+
+        <button
+            id="startBtn"
+            type="button"
+        >
+            ➕ 세트 추가
+        </button>
+
+    </section>
+
+
+    <!-- =========================
+         오늘 PR
+    ========================== -->
+
+    <section class="card">
+
+        <h2>
+            오늘의 최고 기록(PR)
+        </h2>
+
+        <div id="pr">
+            아직 기록이 없습니다.
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         오늘 운동 기록
+    ========================== -->
+
+    <section class="card">
+
+        <h2>
+            오늘 운동 기록
+        </h2>
+
+        <div id="history">
+            오늘 기록이 없습니다.
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         지난 운동 기록
+    ========================== -->
+
+    <section class="card">
+
+        <h2>
+            지난 운동 기록
+        </h2>
+
+
+        <label for="historyDate">
+            날짜 선택
+        </label>
+
+        <input
+            id="historyDate"
+            type="date"
+        >
+
+
+        <div id="pastHistory">
+            날짜를 선택해주세요.
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         휴식 타이머
+    ========================== -->
+
+    <section class="card">
+
+        <h2>
+            휴식 타이머
+        </h2>
+
+
+        <button
+            id="timer60"
+            type="button"
+        >
+            60초
+        </button>
+
+
+        <button
+            id="timer90"
+            type="button"
+        >
+            90초
+        </button>
+
+
+        <button
+            id="timer120"
+            type="button"
+        >
+            120초
+        </button>
+
+
+        <div id="timerText">
+            타이머 대기중
+        </div>
+
+    </section>
 
 </div>
 
 
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./service-worker.js");
-}
-</script>
+<script src="./app.js"></script>
 
-<script src="app.js"></script>
+
+<script>
+
+if ("serviceWorker" in navigator) {
+
+    window.addEventListener(
+        "load",
+        function () {
+
+            navigator.serviceWorker
+                .register("./sw.js")
+                .catch(function (error) {
+
+                    console.error(
+                        "Service Worker 등록 실패:",
+                        error
+                    );
+                });
+
+        }
+    );
+}
+
+</script>
 
 </body>
 </html>
