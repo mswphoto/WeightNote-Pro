@@ -5,7 +5,7 @@
 
 // 앱을 수정해서 배포할 때 캐시 버전을 올려주세요.
 // 예: v8 → v9 → v10
-const CACHE_NAME = "weightnote-pro-v8";
+const CACHE_NAME = "weightnote-pro-v9";
 
 const FILES_TO_CACHE = [
     "./",
