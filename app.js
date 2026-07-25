@@ -3,7 +3,58 @@ const volumeSpan = document.getElementById("volume");
 const setsSpan = document.getElementById("sets");
 const prDiv = document.getElementById("pr");
 
+const searchExercise = document.getElementById("searchExercise");
+const exerciseSelect = document.getElementById("exercise");
+
 let workouts = JSON.parse(localStorage.getItem("workouts")) || [];
+
+const exerciseList = [
+    // 가슴
+    "벤치프레스",
+    "인클라인 벤치프레스",
+    "체스트프레스",
+    "펙덱 플라이",
+    "케이블 크로스오버",
+
+    // 등
+    "랫풀다운",
+    "시티드 로우",
+    "케이블 로우",
+    "바벨 로우",
+    "덤벨 로우",
+    "풀업",
+
+    // 어깨
+    "숄더프레스",
+    "덤벨 숄더프레스",
+    "사이드 레터럴 레이즈",
+    "프론트 레이즈",
+    "리어 델트 플라이",
+
+    // 하체
+    "스쿼트",
+    "레그프레스",
+    "레그 익스텐션",
+    "레그 컬",
+    "루마니안 데드리프트",
+    "힙 어브덕션",
+    "힙 어덕션",
+    "카프 레이즈",
+
+    // 팔
+    "바벨 컬",
+    "덤벨 컬",
+    "해머 컬",
+    "케이블 컬",
+    "트라이셉스 푸시다운",
+    "오버헤드 트라이셉스 익스텐션",
+
+    // 복근
+    "크런치",
+    "레그레이즈",
+    "케이블 크런치",
+    "플랭크"
+];
 
 function save() {
     localStorage.setItem("workouts", JSON.stringify(workouts));
@@ -28,14 +79,16 @@ function render() {
 
         volume += w.weight * w.reps;
 
-        if (w.weight > pr) pr = w.weight;
+        if (w.weight > pr) {
+            pr = w.weight;
+        }
 
         historyDiv.innerHTML += `
-        <div>
-        ${w.exercise}
-        ${w.weight}kg × ${w.reps}
-        <button onclick="removeWorkout(${index})">삭제</button>
-        </div>
+            <div>
+                ${w.exercise}
+                ${w.weight}kg × ${w.reps}
+                <button onclick="removeWorkout(${index})">삭제</button>
+            </div>
         `;
     });
 
@@ -44,82 +97,110 @@ function render() {
     prDiv.textContent = pr + " kg";
 }
 
-function removeWorkout(index){
-    workouts.splice(index,1);
+function removeWorkout(index) {
+    workouts.splice(index, 1);
     save();
     render();
 }
 
-document.getElementById("startBtn").onclick=function(){
+document.getElementById("startBtn").onclick = function () {
 
-    const exercise=document.getElementById("exercise").value;
+    const exercise = exerciseSelect.value;
 
-    let weight=prompt("무게(kg)");
+    if (!exercise) {
+        alert("운동을 선택해주세요.");
+        return;
+    }
 
-    if(weight===null) return;
+    const weightInput = prompt("무게(kg)");
 
-    let reps=prompt("횟수");
+    if (weightInput === null) return;
 
-    if(reps===null) return;
+    const weight = Number(weightInput);
+
+    if (
+        weightInput.trim() === "" ||
+        !Number.isFinite(weight) ||
+        weight < 0
+    ) {
+        alert("무게를 숫자로 입력해주세요.");
+        return;
+    }
+
+    const repsInput = prompt("횟수");
+
+    if (repsInput === null) return;
+
+    const reps = Number(repsInput);
+
+    if (
+        repsInput.trim() === "" ||
+        !Number.isInteger(reps) ||
+        reps <= 0
+    ) {
+        alert("횟수를 1 이상의 정수로 입력해주세요.");
+        return;
+    }
 
     workouts.push({
-        exercise,
-        weight:Number(weight),
-        reps:Number(reps)
+        exercise: exercise,
+        weight: weight,
+        reps: reps,
+        date: new Date().toISOString()
     });
 
     save();
     render();
 };
 
+
+// 휴식 타이머
+
 let timer;
 
-function startTimer(sec){
+function startTimer(sec) {
 
     clearInterval(timer);
 
-    let remain=sec;
+    let remain = sec;
 
-    document.getElementById("timerText").textContent=
-    remain+"초";
+    document.getElementById("timerText").textContent =
+        remain + "초";
 
-    timer=setInterval(()=>{
+    timer = setInterval(() => {
 
         remain--;
 
-        document.getElementById("timerText").textContent=
-        remain+"초";
+        document.getElementById("timerText").textContent =
+            remain + "초";
 
-        if(remain<=0){
+        if (remain <= 0) {
 
             clearInterval(timer);
 
-            document.getElementById("timerText").textContent=
-            "휴식 종료!";
+            document.getElementById("timerText").textContent =
+                "휴식 종료!";
         }
 
-    },1000);
-
+    }, 1000);
 }
 
-document.getElementById("timer60").onclick=()=>startTimer(60);
-document.getElementById("timer90").onclick=()=>startTimer(90);
-document.getElementById("timer120").onclick=()=>startTimer(120);
+document.getElementById("timer60").onclick =
+    () => startTimer(60);
 
-render();
-const searchExercise = document.getElementById("searchExercise");
-const exerciseSelect = document.getElementById("exercise");
+document.getElementById("timer90").onclick =
+    () => startTimer(90);
 
-const exerciseList = [
-    "벤치프레스",
-    "랫풀다운",
-    "스쿼트",
-    "숄더프레스"
-];
+document.getElementById("timer120").onclick =
+    () => startTimer(120);
+
+
+// 운동 검색
 
 searchExercise.addEventListener("input", function () {
 
-    const keyword = searchExercise.value.trim().toLowerCase();
+    const keyword =
+        searchExercise.value.trim().toLowerCase();
 
     exerciseSelect.innerHTML = "";
 
@@ -128,10 +209,28 @@ searchExercise.addEventListener("input", function () {
     );
 
     filtered.forEach(exercise => {
-        const option = document.createElement("option");
+
+        const option =
+            document.createElement("option");
+
         option.value = exercise;
         option.textContent = exercise;
+
         exerciseSelect.appendChild(option);
     });
-
 });
+
+
+// 처음 실행할 때 운동 목록 표시
+
+exerciseList.forEach(exercise => {
+
+    const option = document.createElement("option");
+
+    option.value = exercise;
+    option.textContent = exercise;
+
+    exerciseSelect.appendChild(option);
+});
+
+render();
