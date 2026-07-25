@@ -21,10 +21,14 @@ const distanceInput = document.getElementById("distanceInput");
 
 const startBtn = document.getElementById("startBtn");
 
+const lastRecordDiv = document.getElementById("lastRecord");
+
 let workouts = JSON.parse(localStorage.getItem("workouts")) || [];
 
 
+// ==============================
 // 운동 부위별 종목
+// ==============================
 
 const exercisesByCategory = {
 
@@ -89,31 +93,42 @@ const exercisesByCategory = {
 };
 
 
+// ==============================
 // 저장
+// ==============================
 
 function save() {
-    localStorage.setItem("workouts", JSON.stringify(workouts));
+
+    localStorage.setItem(
+        "workouts",
+        JSON.stringify(workouts)
+    );
 }
 
 
-// 로컬 날짜를 YYYY-MM-DD 형식으로 변환
-// UTC 날짜가 아니라 휴대폰의 실제 현지 날짜 기준
+// ==============================
+// 현지 날짜 YYYY-MM-DD
+// ==============================
 
 function getLocalDateString(date = new Date()) {
 
     const year = date.getFullYear();
 
     const month =
-        String(date.getMonth() + 1).padStart(2, "0");
+        String(date.getMonth() + 1)
+            .padStart(2, "0");
 
     const day =
-        String(date.getDate()).padStart(2, "0");
+        String(date.getDate())
+            .padStart(2, "0");
 
     return `${year}-${month}-${day}`;
 }
 
 
-// 저장된 운동의 날짜 가져오기
+// ==============================
+// 운동 기록 날짜
+// ==============================
 
 function getWorkoutDate(workout) {
 
@@ -121,7 +136,8 @@ function getWorkoutDate(workout) {
         return "";
     }
 
-    const date = new Date(workout.date);
+    const date =
+        new Date(workout.date);
 
     if (Number.isNaN(date.getTime())) {
         return "";
@@ -131,7 +147,9 @@ function getWorkoutDate(workout) {
 }
 
 
-// 웨이트 / 유산소 입력창 전환
+// ==============================
+// 웨이트 / 유산소 입력 전환
+// ==============================
 
 function updateInputMode() {
 
@@ -154,14 +172,87 @@ function updateInputMode() {
 }
 
 
-// 운동 기록 한 줄 생성
+// ==============================
+// 최근 운동 기록 표시
+// ==============================
 
-function createWorkoutRecord(workout, index, allowDelete = true) {
+function showLastRecord() {
+
+    if (!lastRecordDiv) {
+        return;
+    }
+
+    const exercise =
+        exerciseSelect.value;
+
+    if (!exercise) {
+
+        lastRecordDiv.textContent =
+            "최근 기록이 없습니다.";
+
+        return;
+    }
+
+
+    const previous =
+        workouts
+            .filter(workout =>
+                workout.exercise === exercise
+            )
+            .sort((a, b) =>
+                new Date(b.date) -
+                new Date(a.date)
+            )[0];
+
+
+    if (!previous) {
+
+        lastRecordDiv.textContent =
+            "최근 기록이 없습니다.";
+
+        return;
+    }
+
+
+    const date =
+        new Date(previous.date);
+
+    const dateText =
+        `${date.getFullYear()}. ` +
+        `${date.getMonth() + 1}. ` +
+        `${date.getDate()}.`;
+
+
+    if (previous.type === "cardio") {
+
+        lastRecordDiv.textContent =
+            `최근 기록: ${previous.duration}분 / ` +
+            `${previous.distance}km · ${dateText}`;
+
+    } else {
+
+        lastRecordDiv.textContent =
+            `최근 기록: ${previous.weight}kg × ` +
+            `${previous.reps}회 · ${dateText}`;
+    }
+}
+
+
+// ==============================
+// 운동 기록 한 줄 생성
+// ==============================
+
+function createWorkoutRecord(
+    workout,
+    index,
+    allowDelete = true
+) {
 
     const record =
         document.createElement("div");
 
-    record.className = "workout-record";
+    record.className =
+        "workout-record";
 
 
     const text =
@@ -177,7 +268,8 @@ function createWorkoutRecord(workout, index, allowDelete = true) {
             Number(workout.distance) || 0;
 
         text.textContent =
-            `${workout.exercise} ${duration}분 / ${distance}km`;
+            `${workout.exercise} ` +
+            `${duration}분 / ${distance}km`;
 
     } else {
 
@@ -188,7 +280,8 @@ function createWorkoutRecord(workout, index, allowDelete = true) {
             Number(workout.reps) || 0;
 
         text.textContent =
-            `${workout.exercise} ${weight}kg × ${reps}`;
+            `${workout.exercise} ` +
+            `${weight}kg × ${reps}`;
     }
 
 
@@ -200,14 +293,22 @@ function createWorkoutRecord(workout, index, allowDelete = true) {
         const deleteBtn =
             document.createElement("button");
 
-        deleteBtn.textContent = "삭제";
+        deleteBtn.textContent =
+            "삭제";
 
-        deleteBtn.addEventListener("click", function () {
 
-            removeWorkout(index);
-        });
+        deleteBtn.addEventListener(
+            "click",
+            function () {
 
-        record.appendChild(deleteBtn);
+                removeWorkout(index);
+            }
+        );
+
+
+        record.appendChild(
+            deleteBtn
+        );
     }
 
 
@@ -215,7 +316,9 @@ function createWorkoutRecord(workout, index, allowDelete = true) {
 }
 
 
+// ==============================
 // 오늘 기록 표시
+// ==============================
 
 function render() {
 
@@ -224,6 +327,7 @@ function render() {
     const today =
         getLocalDateString();
 
+
     const todayWorkouts =
         workouts
             .map((workout, index) => ({
@@ -231,7 +335,9 @@ function render() {
                 index
             }))
             .filter(item =>
-                getWorkoutDate(item.workout) === today
+                getWorkoutDate(
+                    item.workout
+                ) === today
             );
 
 
@@ -240,13 +346,17 @@ function render() {
         historyDiv.textContent =
             "오늘 기록이 없습니다.";
 
-        volumeSpan.textContent = "0";
-        setsSpan.textContent = "0";
+        volumeSpan.textContent =
+            "0";
+
+        setsSpan.textContent =
+            "0";
 
         prDiv.textContent =
             "아직 기록이 없습니다.";
 
         renderPastHistory();
+        showLastRecord();
 
         return;
     }
@@ -259,7 +369,8 @@ function render() {
 
     todayWorkouts.forEach(item => {
 
-        const w = item.workout;
+        const w =
+            item.workout;
 
 
         if (w.type !== "cardio") {
@@ -270,11 +381,15 @@ function render() {
             const reps =
                 Number(w.reps) || 0;
 
-            volume += weight * reps;
+
+            volume +=
+                weight * reps;
 
             weightSetCount++;
 
+
             if (weight > pr) {
+
                 pr = weight;
             }
         }
@@ -287,11 +402,16 @@ function render() {
                 true
             );
 
-        historyDiv.appendChild(record);
+
+        historyDiv.appendChild(
+            record
+        );
     });
 
 
-    volumeSpan.textContent = volume;
+    volumeSpan.textContent =
+        volume.toLocaleString();
+
 
     setsSpan.textContent =
         todayWorkouts.length;
@@ -310,17 +430,21 @@ function render() {
 
 
     renderPastHistory();
+    showLastRecord();
 }
 
 
-// 지난 기록 표시 + 날짜별 운동 요약
+// ==============================
+// 지난 운동 기록
+// ==============================
 
 function renderPastHistory() {
 
     const selectedDate =
         historyDateInput.value;
 
-    pastHistoryDiv.innerHTML = "";
+    pastHistoryDiv.innerHTML =
+        "";
 
 
     if (!selectedDate) {
@@ -339,11 +463,15 @@ function renderPastHistory() {
                 index
             }))
             .filter(item =>
-                getWorkoutDate(item.workout) === selectedDate
+                getWorkoutDate(
+                    item.workout
+                ) === selectedDate
             );
 
 
-    if (selectedWorkouts.length === 0) {
+    if (
+        selectedWorkouts.length === 0
+    ) {
 
         pastHistoryDiv.textContent =
             "선택한 날짜의 기록이 없습니다.";
@@ -352,17 +480,22 @@ function renderPastHistory() {
     }
 
 
-    // 요약 계산
+    // ==========================
+    // 날짜별 운동 요약
+    // ==========================
 
     let totalVolume = 0;
     let weightSets = 0;
+
     let cardioMinutes = 0;
     let cardioDistance = 0;
 
 
     selectedWorkouts.forEach(item => {
 
-        const w = item.workout;
+        const w =
+            item.workout;
+
 
         if (w.type === "cardio") {
 
@@ -380,32 +513,39 @@ function renderPastHistory() {
             const reps =
                 Number(w.reps) || 0;
 
-            totalVolume += weight * reps;
+
+            totalVolume +=
+                weight * reps;
 
             weightSets++;
         }
     });
 
 
-    // 운동 요약 표시
+    // ==========================
+    // 요약 표시
+    // ==========================
 
     const summary =
         document.createElement("div");
 
-    summary.className = "workout-summary";
+    summary.className =
+        "workout-summary";
 
 
     const title =
         document.createElement("strong");
 
-    title.textContent = "📊 운동 요약";
+    title.textContent =
+        "📊 운동 요약";
 
 
     const volumeText =
         document.createElement("p");
 
     volumeText.textContent =
-        `총 운동량 : ${totalVolume.toLocaleString()} kg`;
+        `총 운동량 : ` +
+        `${totalVolume.toLocaleString()} kg`;
 
 
     const setText =
@@ -419,7 +559,8 @@ function renderPastHistory() {
         document.createElement("p");
 
     cardioText.textContent =
-        `유산소 : ${cardioMinutes}분 / ${cardioDistance.toFixed(1)}km`;
+        `유산소 : ${cardioMinutes}분 / ` +
+        `${cardioDistance.toFixed(1)}km`;
 
 
     summary.appendChild(title);
@@ -427,10 +568,15 @@ function renderPastHistory() {
     summary.appendChild(setText);
     summary.appendChild(cardioText);
 
-    pastHistoryDiv.appendChild(summary);
+
+    pastHistoryDiv.appendChild(
+        summary
+    );
 
 
-    // 개별 운동 기록 표시
+    // ==========================
+    // 개별 운동 기록
+    // ==========================
 
     selectedWorkouts.forEach(item => {
 
@@ -441,10 +587,17 @@ function renderPastHistory() {
                 true
             );
 
-        pastHistoryDiv.appendChild(record);
+
+        pastHistoryDiv.appendChild(
+            record
+        );
     });
 }
+
+
+// ==============================
 // 기록 삭제
+// ==============================
 
 function removeWorkout(index) {
 
@@ -455,7 +608,9 @@ function removeWorkout(index) {
 }
 
 
+// ==============================
 // 운동 목록 표시
+// ==============================
 
 function updateExerciseList() {
 
@@ -468,7 +623,9 @@ function updateExerciseList() {
             .toLowerCase();
 
     const list =
-        exercisesByCategory[category] || [];
+        exercisesByCategory[
+            category
+        ] || [];
 
 
     const filtered =
@@ -479,29 +636,43 @@ function updateExerciseList() {
         );
 
 
-    exerciseSelect.innerHTML = "";
+    exerciseSelect.innerHTML =
+        "";
 
 
     filtered.forEach(exercise => {
 
         const option =
-            document.createElement("option");
+            document.createElement(
+                "option"
+            );
 
-        option.value = exercise;
-        option.textContent = exercise;
+        option.value =
+            exercise;
 
-        exerciseSelect.appendChild(option);
+        option.textContent =
+            exercise;
+
+        exerciseSelect.appendChild(
+            option
+        );
     });
+
+
+    showLastRecord();
 }
 
 
+// ==============================
 // 운동 부위 변경
+// ==============================
 
 categorySelect.addEventListener(
     "change",
     function () {
 
-        searchExercise.value = "";
+        searchExercise.value =
+            "";
 
         updateExerciseList();
         updateInputMode();
@@ -509,7 +680,9 @@ categorySelect.addEventListener(
 );
 
 
+// ==============================
 // 운동 검색
+// ==============================
 
 searchExercise.addEventListener(
     "input",
@@ -520,7 +693,22 @@ searchExercise.addEventListener(
 );
 
 
+// ==============================
+// 운동 종목 변경
+// ==============================
+
+exerciseSelect.addEventListener(
+    "change",
+    function () {
+
+        showLastRecord();
+    }
+);
+
+
+// ==============================
 // 날짜 선택
+// ==============================
 
 historyDateInput.addEventListener(
     "change",
@@ -531,7 +719,9 @@ historyDateInput.addEventListener(
 );
 
 
+// ==============================
 // 기록 추가
+// ==============================
 
 startBtn.addEventListener(
     "click",
@@ -543,21 +733,32 @@ startBtn.addEventListener(
 
         if (!exercise) {
 
-            alert("운동을 선택해주세요.");
+            alert(
+                "운동을 선택해주세요."
+            );
 
             return;
         }
 
 
+        // ======================
         // 유산소
+        // ======================
 
-        if (categorySelect.value === "유산소") {
+        if (
+            categorySelect.value ===
+            "유산소"
+        ) {
 
             const duration =
-                Number(durationInput.value);
+                Number(
+                    durationInput.value
+                );
 
             const distance =
-                Number(distanceInput.value);
+                Number(
+                    distanceInput.value
+                );
 
 
             if (
@@ -566,7 +767,9 @@ startBtn.addEventListener(
                 duration <= 0
             ) {
 
-                alert("운동 시간을 입력해주세요.");
+                alert(
+                    "운동 시간을 입력해주세요."
+                );
 
                 durationInput.focus();
 
@@ -580,7 +783,9 @@ startBtn.addEventListener(
                 distance < 0
             ) {
 
-                alert("거리를 입력해주세요.");
+                alert(
+                    "거리를 입력해주세요."
+                );
 
                 distanceInput.focus();
 
@@ -591,10 +796,19 @@ startBtn.addEventListener(
             workouts.push({
 
                 type: "cardio",
-                exercise: exercise,
-                duration: duration,
-                distance: distance,
-                date: new Date().toISOString()
+
+                exercise:
+                    exercise,
+
+                duration:
+                    duration,
+
+                distance:
+                    distance,
+
+                date:
+                    new Date()
+                        .toISOString()
 
             });
 
@@ -603,8 +817,11 @@ startBtn.addEventListener(
             render();
 
 
-            durationInput.value = "";
-            distanceInput.value = "";
+            durationInput.value =
+                "";
+
+            distanceInput.value =
+                "";
 
             durationInput.focus();
 
@@ -612,13 +829,19 @@ startBtn.addEventListener(
         }
 
 
+        // ======================
         // 웨이트
+        // ======================
 
         const weight =
-            Number(weightInput.value);
+            Number(
+                weightInput.value
+            );
 
         const reps =
-            Number(repsInput.value);
+            Number(
+                repsInput.value
+            );
 
 
         if (
@@ -627,7 +850,9 @@ startBtn.addEventListener(
             weight < 0
         ) {
 
-            alert("무게를 입력해주세요.");
+            alert(
+                "무게를 입력해주세요."
+            );
 
             weightInput.focus();
 
@@ -641,7 +866,9 @@ startBtn.addEventListener(
             reps <= 0
         ) {
 
-            alert("횟수를 입력해주세요.");
+            alert(
+                "횟수를 입력해주세요."
+            );
 
             repsInput.focus();
 
@@ -652,10 +879,19 @@ startBtn.addEventListener(
         workouts.push({
 
             type: "weight",
-            exercise: exercise,
-            weight: weight,
-            reps: reps,
-            date: new Date().toISOString()
+
+            exercise:
+                exercise,
+
+            weight:
+                weight,
+
+            reps:
+                reps,
+
+            date:
+                new Date()
+                    .toISOString()
 
         });
 
@@ -664,13 +900,20 @@ startBtn.addEventListener(
         render();
 
 
-        repsInput.value = "";
+        // 무게는 유지
+        // 횟수만 비움
+
+        repsInput.value =
+            "";
+
         repsInput.focus();
     }
 );
 
 
+// ==============================
 // 휴식 타이머
+// ==============================
 
 let timer = null;
 
@@ -679,51 +922,71 @@ function startTimer(sec) {
 
     clearInterval(timer);
 
-    let remain = sec;
+    let remain =
+        sec;
 
     const timerText =
-        document.getElementById("timerText");
+        document.getElementById(
+            "timerText"
+        );
+
 
     timerText.textContent =
         remain + "초";
 
 
-    timer = setInterval(function () {
+    timer =
+        setInterval(
+            function () {
 
-        remain--;
-
-
-        if (remain <= 0) {
-
-            clearInterval(timer);
-
-            timer = null;
-
-            timerText.textContent =
-                "휴식 종료!";
-
-            return;
-        }
+                remain--;
 
 
-        timerText.textContent =
-            remain + "초";
+                if (remain <= 0) {
 
-    }, 1000);
+                    clearInterval(
+                        timer
+                    );
+
+                    timer = null;
+
+                    timerText.textContent =
+                        "휴식 종료!";
+
+                    return;
+                }
+
+
+                timerText.textContent =
+                    remain + "초";
+
+            },
+            1000
+        );
 }
 
 
-document.getElementById("timer60").onclick =
+document
+    .getElementById("timer60")
+    .onclick =
     () => startTimer(60);
 
-document.getElementById("timer90").onclick =
+
+document
+    .getElementById("timer90")
+    .onclick =
     () => startTimer(90);
 
-document.getElementById("timer120").onclick =
+
+document
+    .getElementById("timer120")
+    .onclick =
     () => startTimer(120);
 
 
+// ==============================
 // 앱 시작
+// ==============================
 
 historyDateInput.max =
     getLocalDateString();
