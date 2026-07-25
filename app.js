@@ -7,6 +7,10 @@ const searchExercise = document.getElementById("searchExercise");
 const exerciseSelect = document.getElementById("exercise");
 const categorySelect = document.getElementById("category");
 
+const weightInput = document.getElementById("weightInput");
+const repsInput = document.getElementById("repsInput");
+const startBtn = document.getElementById("startBtn");
+
 let workouts = JSON.parse(localStorage.getItem("workouts")) || [];
 
 
@@ -82,7 +86,7 @@ function save() {
 }
 
 
-// 기록 화면 표시
+// 운동 기록 화면
 
 function render() {
 
@@ -90,9 +94,11 @@ function render() {
 
     if (workouts.length === 0) {
 
-        historyDiv.innerHTML = "아직 기록이 없습니다.";
-        volumeSpan.textContent = 0;
-        setsSpan.textContent = 0;
+        historyDiv.textContent = "아직 기록이 없습니다.";
+
+        volumeSpan.textContent = "0";
+        setsSpan.textContent = "0";
+
         prDiv.textContent = "아직 기록이 없습니다.";
 
         return;
@@ -103,25 +109,44 @@ function render() {
 
     workouts.forEach((w, index) => {
 
-        volume += w.weight * w.reps;
+        const weight = Number(w.weight);
+        const reps = Number(w.reps);
 
-        if (w.weight > pr) {
-            pr = w.weight;
+        volume += weight * reps;
+
+        if (weight > pr) {
+            pr = weight;
         }
 
-        historyDiv.innerHTML += `
-            <div>
-                ${w.exercise}
-                ${w.weight}kg × ${w.reps}
-                <button onclick="removeWorkout(${index})">
-                    삭제
-                </button>
-            </div>
-        `;
+        const record = document.createElement("div");
+
+        record.className = "workout-record";
+
+
+        const text = document.createElement("span");
+
+        text.textContent =
+            `${w.exercise} ${weight}kg × ${reps}`;
+
+
+        const deleteBtn = document.createElement("button");
+
+        deleteBtn.textContent = "삭제";
+
+        deleteBtn.addEventListener("click", function () {
+            removeWorkout(index);
+        });
+
+
+        record.appendChild(text);
+        record.appendChild(deleteBtn);
+
+        historyDiv.appendChild(record);
     });
 
     volumeSpan.textContent = volume;
     setsSpan.textContent = workouts.length;
+
     prDiv.textContent = pr + " kg";
 }
 
@@ -137,102 +162,7 @@ function removeWorkout(index) {
 }
 
 
-// 운동 추가
-
-document.getElementById("startBtn").onclick = function () {
-
-    const exercise = exerciseSelect.value;
-
-    if (!exercise) {
-        alert("운동을 선택해주세요.");
-        return;
-    }
-
-    const weightInput = prompt("무게(kg)");
-
-    if (weightInput === null) return;
-
-    const weight = Number(weightInput);
-
-    if (
-        weightInput.trim() === "" ||
-        !Number.isFinite(weight) ||
-        weight < 0
-    ) {
-        alert("무게를 숫자로 입력해주세요.");
-        return;
-    }
-
-    const repsInput = prompt("횟수");
-
-    if (repsInput === null) return;
-
-    const reps = Number(repsInput);
-
-    if (
-        repsInput.trim() === "" ||
-        !Number.isInteger(reps) ||
-        reps <= 0
-    ) {
-        alert("횟수를 1 이상의 정수로 입력해주세요.");
-        return;
-    }
-
-    workouts.push({
-        exercise: exercise,
-        weight: weight,
-        reps: reps,
-        date: new Date().toISOString()
-    });
-
-    save();
-    render();
-};
-
-
-// 휴식 타이머
-
-let timer;
-
-function startTimer(sec) {
-
-    clearInterval(timer);
-
-    let remain = sec;
-
-    document.getElementById("timerText").textContent =
-        remain + "초";
-
-    timer = setInterval(() => {
-
-        remain--;
-
-        document.getElementById("timerText").textContent =
-            remain + "초";
-
-        if (remain <= 0) {
-
-            clearInterval(timer);
-
-            document.getElementById("timerText").textContent =
-                "휴식 종료!";
-        }
-
-    }, 1000);
-}
-
-
-document.getElementById("timer60").onclick =
-    () => startTimer(60);
-
-document.getElementById("timer90").onclick =
-    () => startTimer(90);
-
-document.getElementById("timer120").onclick =
-    () => startTimer(120);
-
-
-// 선택한 부위의 운동 종목 표시
+// 선택한 운동 부위의 종목 표시
 
 function updateExerciseList() {
 
@@ -279,6 +209,119 @@ searchExercise.addEventListener("input", function () {
 
     updateExerciseList();
 });
+
+
+// 세트 추가
+
+startBtn.addEventListener("click", function () {
+
+    const exercise = exerciseSelect.value;
+
+    const weight = Number(weightInput.value);
+    const reps = Number(repsInput.value);
+
+
+    if (!exercise) {
+
+        alert("운동을 선택해주세요.");
+
+        return;
+    }
+
+
+    if (
+        weightInput.value.trim() === "" ||
+        !Number.isFinite(weight) ||
+        weight < 0
+    ) {
+
+        alert("무게를 입력해주세요.");
+
+        weightInput.focus();
+
+        return;
+    }
+
+
+    if (
+        repsInput.value.trim() === "" ||
+        !Number.isInteger(reps) ||
+        reps <= 0
+    ) {
+
+        alert("횟수를 입력해주세요.");
+
+        repsInput.focus();
+
+        return;
+    }
+
+
+    workouts.push({
+        exercise: exercise,
+        weight: weight,
+        reps: reps,
+        date: new Date().toISOString()
+    });
+
+
+    save();
+    render();
+
+
+    // 다음 세트에서 같은 무게를 쉽게 사용하도록
+    // 무게는 남기고 횟수만 비웁니다.
+
+    repsInput.value = "";
+    repsInput.focus();
+});
+
+
+// 휴식 타이머
+
+let timer = null;
+
+function startTimer(sec) {
+
+    clearInterval(timer);
+
+    let remain = sec;
+
+    const timerText =
+        document.getElementById("timerText");
+
+    timerText.textContent = remain + "초";
+
+
+    timer = setInterval(function () {
+
+        remain--;
+
+        if (remain <= 0) {
+
+            clearInterval(timer);
+
+            timer = null;
+
+            timerText.textContent = "휴식 종료!";
+
+            return;
+        }
+
+        timerText.textContent = remain + "초";
+
+    }, 1000);
+}
+
+
+document.getElementById("timer60").onclick =
+    () => startTimer(60);
+
+document.getElementById("timer90").onclick =
+    () => startTimer(90);
+
+document.getElementById("timer120").onclick =
+    () => startTimer(120);
 
 
 // 앱 시작
