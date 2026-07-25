@@ -313,7 +313,7 @@ function render() {
 }
 
 
-// 지난 기록 표시
+// 지난 기록 표시 + 날짜별 운동 요약
 
 function renderPastHistory() {
 
@@ -352,6 +352,86 @@ function renderPastHistory() {
     }
 
 
+    // 요약 계산
+
+    let totalVolume = 0;
+    let weightSets = 0;
+    let cardioMinutes = 0;
+    let cardioDistance = 0;
+
+
+    selectedWorkouts.forEach(item => {
+
+        const w = item.workout;
+
+        if (w.type === "cardio") {
+
+            cardioMinutes +=
+                Number(w.duration) || 0;
+
+            cardioDistance +=
+                Number(w.distance) || 0;
+
+        } else {
+
+            const weight =
+                Number(w.weight) || 0;
+
+            const reps =
+                Number(w.reps) || 0;
+
+            totalVolume += weight * reps;
+
+            weightSets++;
+        }
+    });
+
+
+    // 운동 요약 표시
+
+    const summary =
+        document.createElement("div");
+
+    summary.className = "workout-summary";
+
+
+    const title =
+        document.createElement("strong");
+
+    title.textContent = "📊 운동 요약";
+
+
+    const volumeText =
+        document.createElement("p");
+
+    volumeText.textContent =
+        `총 운동량 : ${totalVolume.toLocaleString()} kg`;
+
+
+    const setText =
+        document.createElement("p");
+
+    setText.textContent =
+        `웨이트 : ${weightSets}세트`;
+
+
+    const cardioText =
+        document.createElement("p");
+
+    cardioText.textContent =
+        `유산소 : ${cardioMinutes}분 / ${cardioDistance.toFixed(1)}km`;
+
+
+    summary.appendChild(title);
+    summary.appendChild(volumeText);
+    summary.appendChild(setText);
+    summary.appendChild(cardioText);
+
+    pastHistoryDiv.appendChild(summary);
+
+
+    // 개별 운동 기록 표시
+
     selectedWorkouts.forEach(item => {
 
         const record =
@@ -364,8 +444,6 @@ function renderPastHistory() {
         pastHistoryDiv.appendChild(record);
     });
 }
-
-
 // 기록 삭제
 
 function removeWorkout(index) {
