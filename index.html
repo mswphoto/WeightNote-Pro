@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WeightNote Pro</title>
+
+  <meta name="theme-color" content="#111827">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🏋️ WeightNote Pro</h1>
+
+<div class="card">
+
+<h2>오늘 운동</h2>
+
+<label>운동 부위</label>
+
+<select id="category">
+<option>가슴</option>
+<option>등</option>
+<option>하체</option>
+<option>어깨</option>
+<option>팔</option>
+<option>복근</option>
+<option>유산소</option>
+</select>
+
+<label>운동 종목</label>
+
+<select id="exercise">
+<option>벤치프레스</option>
+<option>랫풀다운</option>
+<option>스쿼트</option>
+<option>숄더프레스</option>
+</select>
+
+<p>총 운동량 :
+<b><span id="volume">0</span> kg</b></p>
+
+<p>운동 기록 :
+<b><span id="sets">0</span></b></p>
+
+<button id="startBtn">➕ 운동 추가</button>
+
+</div>
+
+<div class="card">
+
+<h2>오늘의 최고 기록(PR)</h2>
+
+<div id="pr">
+아직 기록이 없습니다.
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>운동 기록</h2>
+
+<div id="history">
+아직 기록이 없습니다.
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>휴식 타이머</h2>
+
+<button id="timer60">60초</button>
+<button id="timer90">90초</button>
+<button id="timer120">120초</button>
+
+<p id="timerText">
+타이머 대기중
+</p>
+
+</div>
+
+</div>
+
+<script>
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js");
+}
+</script>
+
+<script src="app.js"></script>
+
+</body>
+</html>
