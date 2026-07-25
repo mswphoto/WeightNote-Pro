@@ -1,4 +1,7 @@
 const historyDiv = document.getElementById("history");
+const pastHistoryDiv = document.getElementById("pastHistory");
+const historyDateInput = document.getElementById("historyDate");
+
 const volumeSpan = document.getElementById("volume");
 const setsSpan = document.getElementById("sets");
 const prDiv = document.getElementById("pr");
@@ -93,107 +96,273 @@ function save() {
 }
 
 
+// 로컬 날짜를 YYYY-MM-DD 형식으로 변환
+// UTC 날짜가 아니라 휴대폰의 실제 현지 날짜 기준
+
+function getLocalDateString(date = new Date()) {
+
+    const year = date.getFullYear();
+
+    const month =
+        String(date.getMonth() + 1).padStart(2, "0");
+
+    const day =
+        String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+
+// 저장된 운동의 날짜 가져오기
+
+function getWorkoutDate(workout) {
+
+    if (!workout.date) {
+        return "";
+    }
+
+    const date = new Date(workout.date);
+
+    if (Number.isNaN(date.getTime())) {
+        return "";
+    }
+
+    return getLocalDateString(date);
+}
+
+
 // 웨이트 / 유산소 입력창 전환
 
 function updateInputMode() {
 
-    const isCardio = categorySelect.value === "유산소";
+    const isCardio =
+        categorySelect.value === "유산소";
 
     weightFields.hidden = isCardio;
     cardioFields.hidden = !isCardio;
 
     if (isCardio) {
-        startBtn.textContent = "➕ 유산소 기록 추가";
+
+        startBtn.textContent =
+            "➕ 유산소 기록 추가";
+
     } else {
-        startBtn.textContent = "➕ 세트 추가";
+
+        startBtn.textContent =
+            "➕ 세트 추가";
     }
 }
 
 
-// 운동 기록 표시
+// 운동 기록 한 줄 생성
+
+function createWorkoutRecord(workout, index, allowDelete = true) {
+
+    const record =
+        document.createElement("div");
+
+    record.className = "workout-record";
+
+
+    const text =
+        document.createElement("span");
+
+
+    if (workout.type === "cardio") {
+
+        const duration =
+            Number(workout.duration) || 0;
+
+        const distance =
+            Number(workout.distance) || 0;
+
+        text.textContent =
+            `${workout.exercise} ${duration}분 / ${distance}km`;
+
+    } else {
+
+        const weight =
+            Number(workout.weight) || 0;
+
+        const reps =
+            Number(workout.reps) || 0;
+
+        text.textContent =
+            `${workout.exercise} ${weight}kg × ${reps}`;
+    }
+
+
+    record.appendChild(text);
+
+
+    if (allowDelete) {
+
+        const deleteBtn =
+            document.createElement("button");
+
+        deleteBtn.textContent = "삭제";
+
+        deleteBtn.addEventListener("click", function () {
+
+            removeWorkout(index);
+        });
+
+        record.appendChild(deleteBtn);
+    }
+
+
+    return record;
+}
+
+
+// 오늘 기록 표시
 
 function render() {
 
     historyDiv.innerHTML = "";
 
-    if (workouts.length === 0) {
+    const today =
+        getLocalDateString();
 
-        historyDiv.textContent = "아직 기록이 없습니다.";
+    const todayWorkouts =
+        workouts
+            .map((workout, index) => ({
+                workout,
+                index
+            }))
+            .filter(item =>
+                getWorkoutDate(item.workout) === today
+            );
+
+
+    if (todayWorkouts.length === 0) {
+
+        historyDiv.textContent =
+            "오늘 기록이 없습니다.";
+
         volumeSpan.textContent = "0";
         setsSpan.textContent = "0";
-        prDiv.textContent = "아직 기록이 없습니다.";
+
+        prDiv.textContent =
+            "아직 기록이 없습니다.";
+
+        renderPastHistory();
 
         return;
     }
+
 
     let volume = 0;
     let pr = 0;
     let weightSetCount = 0;
 
-    workouts.forEach((w, index) => {
 
-        const record = document.createElement("div");
-        record.className = "workout-record";
+    todayWorkouts.forEach(item => {
 
-        const text = document.createElement("span");
+        const w = item.workout;
 
 
-        // 유산소 기록
+        if (w.type !== "cardio") {
 
-        if (w.type === "cardio") {
+            const weight =
+                Number(w.weight) || 0;
 
-            const duration = Number(w.duration) || 0;
-            const distance = Number(w.distance) || 0;
-
-            text.textContent =
-                `${w.exercise} ${duration}분 / ${distance}km`;
-
-        }
-
-        // 웨이트 기록
-        // 기존 v4 기록도 자동 호환
-
-        else {
-
-            const weight = Number(w.weight) || 0;
-            const reps = Number(w.reps) || 0;
+            const reps =
+                Number(w.reps) || 0;
 
             volume += weight * reps;
+
             weightSetCount++;
 
             if (weight > pr) {
                 pr = weight;
             }
-
-            text.textContent =
-                `${w.exercise} ${weight}kg × ${reps}`;
         }
 
 
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "삭제";
-
-        deleteBtn.addEventListener("click", function () {
-            removeWorkout(index);
-        });
-
-
-        record.appendChild(text);
-        record.appendChild(deleteBtn);
+        const record =
+            createWorkoutRecord(
+                w,
+                item.index,
+                true
+            );
 
         historyDiv.appendChild(record);
     });
 
 
     volumeSpan.textContent = volume;
-    setsSpan.textContent = workouts.length;
+
+    setsSpan.textContent =
+        todayWorkouts.length;
 
 
     if (weightSetCount > 0) {
-        prDiv.textContent = pr + " kg";
+
+        prDiv.textContent =
+            pr + " kg";
+
     } else {
-        prDiv.textContent = "웨이트 기록이 없습니다.";
+
+        prDiv.textContent =
+            "웨이트 기록이 없습니다.";
     }
+
+
+    renderPastHistory();
+}
+
+
+// 지난 기록 표시
+
+function renderPastHistory() {
+
+    const selectedDate =
+        historyDateInput.value;
+
+    pastHistoryDiv.innerHTML = "";
+
+
+    if (!selectedDate) {
+
+        pastHistoryDiv.textContent =
+            "날짜를 선택해주세요.";
+
+        return;
+    }
+
+
+    const selectedWorkouts =
+        workouts
+            .map((workout, index) => ({
+                workout,
+                index
+            }))
+            .filter(item =>
+                getWorkoutDate(item.workout) === selectedDate
+            );
+
+
+    if (selectedWorkouts.length === 0) {
+
+        pastHistoryDiv.textContent =
+            "선택한 날짜의 기록이 없습니다.";
+
+        return;
+    }
+
+
+    selectedWorkouts.forEach(item => {
+
+        const record =
+            createWorkoutRecord(
+                item.workout,
+                item.index,
+                true
+            );
+
+        pastHistoryDiv.appendChild(record);
+    });
 }
 
 
@@ -212,17 +381,24 @@ function removeWorkout(index) {
 
 function updateExerciseList() {
 
-    const category = categorySelect.value;
+    const category =
+        categorySelect.value;
 
     const keyword =
-        searchExercise.value.trim().toLowerCase();
+        searchExercise.value
+            .trim()
+            .toLowerCase();
 
     const list =
         exercisesByCategory[category] || [];
 
-    const filtered = list.filter(exercise =>
-        exercise.toLowerCase().includes(keyword)
-    );
+
+    const filtered =
+        list.filter(exercise =>
+            exercise
+                .toLowerCase()
+                .includes(keyword)
+        );
 
 
     exerciseSelect.innerHTML = "";
@@ -230,7 +406,8 @@ function updateExerciseList() {
 
     filtered.forEach(exercise => {
 
-        const option = document.createElement("option");
+        const option =
+            document.createElement("option");
 
         option.value = exercise;
         option.textContent = exercise;
@@ -242,52 +419,114 @@ function updateExerciseList() {
 
 // 운동 부위 변경
 
-categorySelect.addEventListener("change", function () {
+categorySelect.addEventListener(
+    "change",
+    function () {
 
-    searchExercise.value = "";
+        searchExercise.value = "";
 
-    updateExerciseList();
-    updateInputMode();
-});
+        updateExerciseList();
+        updateInputMode();
+    }
+);
 
 
 // 운동 검색
 
-searchExercise.addEventListener("input", function () {
+searchExercise.addEventListener(
+    "input",
+    function () {
 
-    updateExerciseList();
-});
+        updateExerciseList();
+    }
+);
+
+
+// 날짜 선택
+
+historyDateInput.addEventListener(
+    "change",
+    function () {
+
+        renderPastHistory();
+    }
+);
 
 
 // 기록 추가
 
-startBtn.addEventListener("click", function () {
+startBtn.addEventListener(
+    "click",
+    function () {
 
-    const exercise = exerciseSelect.value;
-
-    if (!exercise) {
-
-        alert("운동을 선택해주세요.");
-
-        return;
-    }
+        const exercise =
+            exerciseSelect.value;
 
 
-    // 유산소
+        if (!exercise) {
 
-    if (categorySelect.value === "유산소") {
+            alert("운동을 선택해주세요.");
 
-        const duration = Number(durationInput.value);
-        const distance = Number(distanceInput.value);
+            return;
+        }
 
 
-        if (
-            durationInput.value.trim() === "" ||
-            !Number.isFinite(duration) ||
-            duration <= 0
-        ) {
+        // 유산소
 
-            alert("운동 시간을 입력해주세요.");
+        if (categorySelect.value === "유산소") {
+
+            const duration =
+                Number(durationInput.value);
+
+            const distance =
+                Number(distanceInput.value);
+
+
+            if (
+                durationInput.value.trim() === "" ||
+                !Number.isFinite(duration) ||
+                duration <= 0
+            ) {
+
+                alert("운동 시간을 입력해주세요.");
+
+                durationInput.focus();
+
+                return;
+            }
+
+
+            if (
+                distanceInput.value.trim() === "" ||
+                !Number.isFinite(distance) ||
+                distance < 0
+            ) {
+
+                alert("거리를 입력해주세요.");
+
+                distanceInput.focus();
+
+                return;
+            }
+
+
+            workouts.push({
+
+                type: "cardio",
+                exercise: exercise,
+                duration: duration,
+                distance: distance,
+                date: new Date().toISOString()
+
+            });
+
+
+            save();
+            render();
+
+
+            durationInput.value = "";
+            distanceInput.value = "";
 
             durationInput.focus();
 
@@ -295,15 +534,38 @@ startBtn.addEventListener("click", function () {
         }
 
 
+        // 웨이트
+
+        const weight =
+            Number(weightInput.value);
+
+        const reps =
+            Number(repsInput.value);
+
+
         if (
-            distanceInput.value.trim() === "" ||
-            !Number.isFinite(distance) ||
-            distance < 0
+            weightInput.value.trim() === "" ||
+            !Number.isFinite(weight) ||
+            weight < 0
         ) {
 
-            alert("거리를 입력해주세요.");
+            alert("무게를 입력해주세요.");
 
-            distanceInput.focus();
+            weightInput.focus();
+
+            return;
+        }
+
+
+        if (
+            repsInput.value.trim() === "" ||
+            !Number.isInteger(reps) ||
+            reps <= 0
+        ) {
+
+            alert("횟수를 입력해주세요.");
+
+            repsInput.focus();
 
             return;
         }
@@ -311,10 +573,10 @@ startBtn.addEventListener("click", function () {
 
         workouts.push({
 
-            type: "cardio",
+            type: "weight",
             exercise: exercise,
-            duration: duration,
-            distance: distance,
+            weight: weight,
+            reps: reps,
             date: new Date().toISOString()
 
         });
@@ -324,74 +586,16 @@ startBtn.addEventListener("click", function () {
         render();
 
 
-        durationInput.value = "";
-        distanceInput.value = "";
-
-        durationInput.focus();
-
-        return;
-    }
-
-
-    // 웨이트
-
-    const weight = Number(weightInput.value);
-    const reps = Number(repsInput.value);
-
-
-    if (
-        weightInput.value.trim() === "" ||
-        !Number.isFinite(weight) ||
-        weight < 0
-    ) {
-
-        alert("무게를 입력해주세요.");
-
-        weightInput.focus();
-
-        return;
-    }
-
-
-    if (
-        repsInput.value.trim() === "" ||
-        !Number.isInteger(reps) ||
-        reps <= 0
-    ) {
-
-        alert("횟수를 입력해주세요.");
-
+        repsInput.value = "";
         repsInput.focus();
-
-        return;
     }
-
-
-    workouts.push({
-
-        type: "weight",
-        exercise: exercise,
-        weight: weight,
-        reps: reps,
-        date: new Date().toISOString()
-
-    });
-
-
-    save();
-    render();
-
-
-    // 같은 무게로 다음 세트 입력 가능
-
-    repsInput.value = "";
-    repsInput.focus();
-});
+);
 
 
 // 휴식 타이머
 
 let timer = null;
+
 
 function startTimer(sec) {
 
@@ -402,7 +606,8 @@ function startTimer(sec) {
     const timerText =
         document.getElementById("timerText");
 
-    timerText.textContent = remain + "초";
+    timerText.textContent =
+        remain + "초";
 
 
     timer = setInterval(function () {
@@ -416,13 +621,15 @@ function startTimer(sec) {
 
             timer = null;
 
-            timerText.textContent = "휴식 종료!";
+            timerText.textContent =
+                "휴식 종료!";
 
             return;
         }
 
 
-        timerText.textContent = remain + "초";
+        timerText.textContent =
+            remain + "초";
 
     }, 1000);
 }
@@ -439,6 +646,9 @@ document.getElementById("timer120").onclick =
 
 
 // 앱 시작
+
+historyDateInput.max =
+    getLocalDateString();
 
 updateExerciseList();
 updateInputMode();
