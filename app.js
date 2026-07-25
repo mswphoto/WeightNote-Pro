@@ -107,3 +107,31 @@ document.getElementById("timer90").onclick=()=>startTimer(90);
 document.getElementById("timer120").onclick=()=>startTimer(120);
 
 render();
+const searchExercise = document.getElementById("searchExercise");
+const exerciseSelect = document.getElementById("exercise");
+
+const exerciseList = [
+    "벤치프레스",
+    "랫풀다운",
+    "스쿼트",
+    "숄더프레스"
+];
+
+searchExercise.addEventListener("input", function () {
+
+    const keyword = searchExercise.value.trim().toLowerCase();
+
+    exerciseSelect.innerHTML = "";
+
+    const filtered = exerciseList.filter(exercise =>
+        exercise.toLowerCase().includes(keyword)
+    );
+
+    filtered.forEach(exercise => {
+        const option = document.createElement("option");
+        option.value = exercise;
+        option.textContent = exercise;
+        exerciseSelect.appendChild(option);
+    });
+
+});
