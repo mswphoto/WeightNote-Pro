@@ -50,9 +50,7 @@
     <h1>🏋️ WeightNote Pro</h1>
 
 
-    <!-- =========================
-         오늘 운동 입력
-    ========================== -->
+    <!-- 오늘 운동 입력 -->
 
     <section class="card">
 
@@ -65,33 +63,13 @@
 
         <select id="category">
 
-            <option value="가슴">
-                가슴
-            </option>
-
-            <option value="등">
-                등
-            </option>
-
-            <option value="하체">
-                하체
-            </option>
-
-            <option value="어깨">
-                어깨
-            </option>
-
-            <option value="팔">
-                팔
-            </option>
-
-            <option value="복근">
-                복근
-            </option>
-
-            <option value="유산소">
-                유산소
-            </option>
+            <option value="가슴">가슴</option>
+            <option value="등">등</option>
+            <option value="하체">하체</option>
+            <option value="어깨">어깨</option>
+            <option value="팔">팔</option>
+            <option value="복근">복근</option>
+            <option value="유산소">유산소</option>
 
         </select>
 
@@ -223,9 +201,7 @@
     </section>
 
 
-    <!-- =========================
-         오늘 PR
-    ========================== -->
+    <!-- 오늘 PR -->
 
     <section class="card">
 
@@ -240,9 +216,7 @@
     </section>
 
 
-    <!-- =========================
-         오늘 운동 기록
-    ========================== -->
+    <!-- 오늘 운동 기록 -->
 
     <section class="card">
 
@@ -257,9 +231,7 @@
     </section>
 
 
-    <!-- =========================
-         지난 운동 기록
-    ========================== -->
+    <!-- 지난 운동 기록 -->
 
     <section class="card">
 
@@ -285,9 +257,7 @@
     </section>
 
 
-    <!-- =========================
-         휴식 타이머
-    ========================== -->
+    <!-- 휴식 타이머 -->
 
     <section class="card">
 
@@ -329,29 +299,40 @@
 </div>
 
 
+<!-- WeightNote Pro JavaScript -->
+
 <script src="./app.js"></script>
 
+
+<!-- Service Worker -->
 
 <script>
 
 if ("serviceWorker" in navigator) {
 
-    window.addEventListener(
-        "load",
-        function () {
+    window.addEventListener("load", function () {
 
-            navigator.serviceWorker
-                .register("./sw.js")
-                .catch(function (error) {
+        navigator.serviceWorker
+            .register("./service-worker.js")
+            .then(function (registration) {
 
-                    console.error(
-                        "Service Worker 등록 실패:",
-                        error
-                    );
-                });
+                console.log(
+                    "Service Worker 등록 성공:",
+                    registration.scope
+                );
 
-        }
-    );
+            })
+            .catch(function (error) {
+
+                console.error(
+                    "Service Worker 등록 실패:",
+                    error
+                );
+
+            });
+
+    });
+
 }
 
 </script>
