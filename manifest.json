@@ -1,21 +1,12 @@
 {
   "name": "WeightNote Pro",
   "short_name": "WeightNote",
+  "description": "웨이트와 유산소 운동을 간편하게 기록하는 운동 기록 앱",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#111827",
   "theme_color": "#111827",
-  "orientation": "portrait",
-  "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+  "lang": "ko-KR",
+  "orientation": "portrait-primary"
 }
