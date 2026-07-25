@@ -7,8 +7,15 @@ const searchExercise = document.getElementById("searchExercise");
 const exerciseSelect = document.getElementById("exercise");
 const categorySelect = document.getElementById("category");
 
+const weightFields = document.getElementById("weightFields");
+const cardioFields = document.getElementById("cardioFields");
+
 const weightInput = document.getElementById("weightInput");
 const repsInput = document.getElementById("repsInput");
+
+const durationInput = document.getElementById("durationInput");
+const distanceInput = document.getElementById("distanceInput");
+
 const startBtn = document.getElementById("startBtn");
 
 let workouts = JSON.parse(localStorage.getItem("workouts")) || [];
@@ -86,7 +93,24 @@ function save() {
 }
 
 
-// 운동 기록 화면
+// 웨이트 / 유산소 입력창 전환
+
+function updateInputMode() {
+
+    const isCardio = categorySelect.value === "유산소";
+
+    weightFields.hidden = isCardio;
+    cardioFields.hidden = !isCardio;
+
+    if (isCardio) {
+        startBtn.textContent = "➕ 유산소 기록 추가";
+    } else {
+        startBtn.textContent = "➕ 세트 추가";
+    }
+}
+
+
+// 운동 기록 표시
 
 function render() {
 
@@ -95,10 +119,8 @@ function render() {
     if (workouts.length === 0) {
 
         historyDiv.textContent = "아직 기록이 없습니다.";
-
         volumeSpan.textContent = "0";
         setsSpan.textContent = "0";
-
         prDiv.textContent = "아직 기록이 없습니다.";
 
         return;
@@ -106,31 +128,49 @@ function render() {
 
     let volume = 0;
     let pr = 0;
+    let weightSetCount = 0;
 
     workouts.forEach((w, index) => {
 
-        const weight = Number(w.weight);
-        const reps = Number(w.reps);
-
-        volume += weight * reps;
-
-        if (weight > pr) {
-            pr = weight;
-        }
-
         const record = document.createElement("div");
-
         record.className = "workout-record";
-
 
         const text = document.createElement("span");
 
-        text.textContent =
-            `${w.exercise} ${weight}kg × ${reps}`;
+
+        // 유산소 기록
+
+        if (w.type === "cardio") {
+
+            const duration = Number(w.duration) || 0;
+            const distance = Number(w.distance) || 0;
+
+            text.textContent =
+                `${w.exercise} ${duration}분 / ${distance}km`;
+
+        }
+
+        // 웨이트 기록
+        // 기존 v4 기록도 자동 호환
+
+        else {
+
+            const weight = Number(w.weight) || 0;
+            const reps = Number(w.reps) || 0;
+
+            volume += weight * reps;
+            weightSetCount++;
+
+            if (weight > pr) {
+                pr = weight;
+            }
+
+            text.textContent =
+                `${w.exercise} ${weight}kg × ${reps}`;
+        }
 
 
         const deleteBtn = document.createElement("button");
-
         deleteBtn.textContent = "삭제";
 
         deleteBtn.addEventListener("click", function () {
@@ -144,10 +184,16 @@ function render() {
         historyDiv.appendChild(record);
     });
 
+
     volumeSpan.textContent = volume;
     setsSpan.textContent = workouts.length;
 
-    prDiv.textContent = pr + " kg";
+
+    if (weightSetCount > 0) {
+        prDiv.textContent = pr + " kg";
+    } else {
+        prDiv.textContent = "웨이트 기록이 없습니다.";
+    }
 }
 
 
@@ -162,7 +208,7 @@ function removeWorkout(index) {
 }
 
 
-// 선택한 운동 부위의 종목 표시
+// 운동 목록 표시
 
 function updateExerciseList() {
 
@@ -178,12 +224,13 @@ function updateExerciseList() {
         exercise.toLowerCase().includes(keyword)
     );
 
+
     exerciseSelect.innerHTML = "";
+
 
     filtered.forEach(exercise => {
 
-        const option =
-            document.createElement("option");
+        const option = document.createElement("option");
 
         option.value = exercise;
         option.textContent = exercise;
@@ -200,6 +247,7 @@ categorySelect.addEventListener("change", function () {
     searchExercise.value = "";
 
     updateExerciseList();
+    updateInputMode();
 });
 
 
@@ -211,15 +259,11 @@ searchExercise.addEventListener("input", function () {
 });
 
 
-// 세트 추가
+// 기록 추가
 
 startBtn.addEventListener("click", function () {
 
     const exercise = exerciseSelect.value;
-
-    const weight = Number(weightInput.value);
-    const reps = Number(repsInput.value);
-
 
     if (!exercise) {
 
@@ -227,6 +271,72 @@ startBtn.addEventListener("click", function () {
 
         return;
     }
+
+
+    // 유산소
+
+    if (categorySelect.value === "유산소") {
+
+        const duration = Number(durationInput.value);
+        const distance = Number(distanceInput.value);
+
+
+        if (
+            durationInput.value.trim() === "" ||
+            !Number.isFinite(duration) ||
+            duration <= 0
+        ) {
+
+            alert("운동 시간을 입력해주세요.");
+
+            durationInput.focus();
+
+            return;
+        }
+
+
+        if (
+            distanceInput.value.trim() === "" ||
+            !Number.isFinite(distance) ||
+            distance < 0
+        ) {
+
+            alert("거리를 입력해주세요.");
+
+            distanceInput.focus();
+
+            return;
+        }
+
+
+        workouts.push({
+
+            type: "cardio",
+            exercise: exercise,
+            duration: duration,
+            distance: distance,
+            date: new Date().toISOString()
+
+        });
+
+
+        save();
+        render();
+
+
+        durationInput.value = "";
+        distanceInput.value = "";
+
+        durationInput.focus();
+
+        return;
+    }
+
+
+    // 웨이트
+
+    const weight = Number(weightInput.value);
+    const reps = Number(repsInput.value);
 
 
     if (
@@ -258,10 +368,13 @@ startBtn.addEventListener("click", function () {
 
 
     workouts.push({
+
+        type: "weight",
         exercise: exercise,
         weight: weight,
         reps: reps,
         date: new Date().toISOString()
+
     });
 
 
@@ -269,8 +382,7 @@ startBtn.addEventListener("click", function () {
     render();
 
 
-    // 다음 세트에서 같은 무게를 쉽게 사용하도록
-    // 무게는 남기고 횟수만 비웁니다.
+    // 같은 무게로 다음 세트 입력 가능
 
     repsInput.value = "";
     repsInput.focus();
@@ -297,6 +409,7 @@ function startTimer(sec) {
 
         remain--;
 
+
         if (remain <= 0) {
 
             clearInterval(timer);
@@ -307,6 +420,7 @@ function startTimer(sec) {
 
             return;
         }
+
 
         timerText.textContent = remain + "초";
 
@@ -327,4 +441,5 @@ document.getElementById("timer120").onclick =
 // 앱 시작
 
 updateExerciseList();
+updateInputMode();
 render();
