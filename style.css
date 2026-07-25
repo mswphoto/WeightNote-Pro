@@ -88,33 +88,35 @@ button:hover{
 }
 /* 지난 운동 기록 - 날짜 선택 */
 
+/* 지난 운동 기록 날짜 선택 - iPhone */
+
 #historyDate {
     display: block;
-    width: 100%;
+    width: 100% !important;
+    height: 60px !important;
+    min-height: 60px !important;
+
     box-sizing: border-box;
+    margin: 12px 0 20px 0;
+    padding: 0 16px;
 
-    margin-top: 12px;
-    margin-bottom: 20px;
-
-    padding: 18px 20px;
-
-    font-size: 20px;
+    font-family: inherit;
+    font-size: 18px !important;
     font-weight: 600;
 
     color: #111827;
-    background: #f3f4f6;
+    background-color: #f3f4f6;
 
-    border: none;
-    border-radius: 14px;
+    border: 0;
+    border-radius: 12px;
 
-    min-height: 60px;
-
-    -webkit-appearance: none;
-    appearance: none;
+    -webkit-appearance: auto;
+    appearance: auto;
 }
 
 #historyDate::-webkit-date-and-time-value {
     text-align: left;
+    min-height: 1.2em;
 }
 
 #pastHistory {
