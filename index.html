@@ -48,7 +48,23 @@
 <div class="container">
 
     <h1>🏋️ WeightNote Pro</h1>
+<section class="card">
 
+<h2>계정</h2>
+
+<div id="userInfo">
+로그인하지 않았습니다.
+</div>
+
+<button id="loginBtn" type="button">
+Google 로그인
+</button>
+
+<button id="logoutBtn" type="button" hidden>
+로그아웃
+</button>
+
+</section>
 
     <!-- 오늘 운동 입력 -->
 
@@ -202,18 +218,19 @@
 
 
     <!-- 오늘 PR -->
+<section class="card">
 
-    <section class="card">
+    <h2>
+        오늘의 최고 기록(PR)
+    </h2>
 
-        <h2>
-            오늘의 최고 기록(PR)
-        </h2>
+    <div id="pr">
+        아직 기록이 없습니다.
+    </div>
 
-        <div id="pr">
-            아직 기록이 없습니다.
-        </div>
+</section>
+    
 
-    </section>
 
 
     <!-- 오늘 운동 기록 -->
@@ -300,7 +317,32 @@
 
 
 <!-- WeightNote Pro JavaScript -->
+<!-- Firebase -->
 
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+
+import {
+getAuth,
+GoogleAuthProvider,
+signInWithPopup,
+signOut,
+onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+window.firebaseModules = {
+initializeApp,
+getAuth,
+GoogleAuthProvider,
+signInWithPopup,
+signOut,
+onAuthStateChanged
+};
+
+</script>
 <script src="./app.js"></script>
 
 
