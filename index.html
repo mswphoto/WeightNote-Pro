@@ -319,30 +319,49 @@ Google 로그인
 <!-- WeightNote Pro JavaScript -->
 <!-- Firebase -->
 
+
+
 <script type="module">
 
 import { initializeApp }
-from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
 
 import {
-getAuth,
-GoogleAuthProvider,
-signInWithPopup,
-signOut,
-onAuthStateChanged
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signOut,
+    onAuthStateChanged
 }
-from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyD1KqtNDNRDdkM5iTXRnaAzQ9Sny3EMRFc",
+    authDomain: "weightnote-pro.firebaseapp.com",
+    projectId: "weightnote-pro",
+    storageBucket: "weightnote-pro.firebasestorage.app",
+    messagingSenderId: "27640688946",
+    appId: "1:27640688946:web:f0346b757620f619cfe72b"
+};
+
+const app = initializeApp(firebaseConfig);
+
+
+
+
+
 
 window.firebaseModules = {
-initializeApp,
-getAuth,
-GoogleAuthProvider,
-signInWithPopup,
-signOut,
-onAuthStateChanged
+    app,
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signOut,
+    onAuthStateChanged
 };
 
 </script>
+
 <script src="./app.js"></script>
 
 
