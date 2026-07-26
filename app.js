@@ -31,7 +31,16 @@ const distanceInput = document.getElementById("distanceInput");
 const startBtn = document.getElementById("startBtn");
 
 const lastRecordDiv = document.getElementById("lastRecord");
+// ==============================
+// Firebase 로그인
+// ==============================
 
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const userInfo = document.getElementById("userInfo");
+
+let auth = null;
+let provider = null;
 
 // ==============================
 // 저장된 기록 불러오기
@@ -1011,9 +1020,43 @@ document
 // 앱 시작
 // ==============================
 
-historyDateInput.max =
-    getLocalDateString();
+historyDateInput.max = getLocalDateString();
 
 updateExerciseList();
 updateInputMode();
 render();
+
+window.addEventListener("load", () => {
+
+    if (!window.firebaseModules) return;
+
+    auth = window.firebaseModules.getAuth(window.firebaseModules.app);
+    provider = new window.firebaseModules.GoogleAuthProvider();
+
+    loginBtn.addEventListener("click", () => {
+        window.firebaseModules.signInWithPopup(auth, provider)
+            .catch(console.error);
+    });
+
+    logoutBtn.addEventListener("click", () => {
+        window.firebaseModules.signOut(auth);
+    });
+
+    window.firebaseModules.onAuthStateChanged(auth, user => {
+
+        if (user) {
+
+            userInfo.textContent = `로그인: ${user.displayName}`;
+            loginBtn.hidden = true;
+            logoutBtn.hidden = false;
+
+        } else {
+
+            userInfo.textContent = "로그인하지 않았습니다.";
+            loginBtn.hidden = false;
+            logoutBtn.hidden = true;
+        }
+
+    });
+
+});
